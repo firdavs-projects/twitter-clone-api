@@ -1,0 +1,8 @@
+{
+  "port": 5000,
+  "jwtSecret": "my finances is my fullstack project",
+  "mongoUrl": "mongodb+srv://twitter:oejsMwVhTXFQrWUS@cluster0.9sxpsqn.mongodb.net/?retryWrites=true&w=majority",
+  "baseUrl": "http://localhost:5000/"
+}
+
+
