@@ -13,11 +13,9 @@ module.exports = async (req, res, next) => {
       return res.status(401).json({message: 'Пользователь не авторизован'})
     }
 
-    const decoded = jwt.verify(token, config.get('jwtSecret'))
+    // await User.updateOne({_id: decoded.userId}, {$set: {lastSeen: Date.now()}})
 
-    await User.updateOne({_id: decoded.userId}, {$set: {lastSeen: Date.now()}})
-
-    req.user = decoded
+    req.user = jwt.verify(token, config.get('jwtSecret'))
     next()
 
   } catch (e) {

@@ -2,6 +2,7 @@ const {Router} = require('express')
 const User = require('../models/User')
 const Tweet = require('../models/Tweet')
 const authMiddleware = require('../middleware/auth.middleware')
+const adminMiddleware = require('../middleware/auth.middleware')
 const router = Router()
 
 router.get('/', authMiddleware, async (req, res) => {
