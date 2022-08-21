@@ -4,10 +4,12 @@ module.exports = async (req, res, next) => {
     }
 
     try {
-        const user = req.user
-        console.log(user.role)
-        if (!user?.role) {
-            return res.status(403).json({message: 'Нет доступа'})
+        if (!req?.user) {
+            return res.status(401).json({message: 'Пользователь не авторизован'})
+        }
+
+        if (req.user.role !== 'ADMIN') {
+            return res.status(403).json({message: 'Нет доступа', userRole: req?.user.role})
         }
         next()
 

@@ -5,9 +5,6 @@ const jwt = require('jsonwebtoken')
 const {check, validationResult} = require('express-validator')
 const User = require('../models/User')
 const Role = require('../models/Role')
-const Tweet = require("../models/Tweet");
-const authMiddleware = require('../middleware/auth.middleware')
-const adminMiddleware = require('../middleware/auth.middleware')
 const router = Router()
 
 router.post(
@@ -124,33 +121,6 @@ router.post(
     }
 
   }
-)
-
-router.post(
-    '/role',
-    authMiddleware,
-    adminMiddleware,
-    async (req, res) => {
-
-      try {
-        const {role} = req.body
-
-        const candidate = await Role.findOne({role})
-        if (candidate) {
-          return res.status(400)
-              .json({message: 'Такая роль уже существует'})
-        }
-
-        const newRole = new Role({role})
-        await newRole.save()
-        res.status(201).json({message: 'Роль создан', newRole})
-
-      } catch (e) {
-        res.status(500)
-            .json({message: 'Что-то пошло не так, попробуйте снова'})
-      }
-
-    }
 )
 
 module.exports = router
