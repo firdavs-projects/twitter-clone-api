@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/auth.middleware')
 const adminMiddleware = require('../middleware/auth.middleware')
 const router = Router()
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/me', authMiddleware, async (req, res) => {
         try {
             const user = await User.findById(req.user.userId)
 
@@ -16,10 +16,27 @@ router.get('/', authMiddleware, async (req, res) => {
             }
 
             const tweets = await Tweet.find({_id: user.tweets})
-                // .populate('tweets')
+                .populate('tweets')
                 // .populate('likes')
-                // .populate('commentToTweetId')
+                .populate('commentToTweetId')
 
+            res.json({tweets})
+
+        } catch
+            (e) {
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+router.get('/', authMiddleware, async (req, res) => {
+        try {
+
+            const tweets = await Tweet.find()
+            // .populate('tweets')
+            // .populate('likes')
+            // .populate('commentToTweetId')
             res.json({tweets})
 
         } catch
