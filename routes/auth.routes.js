@@ -5,8 +5,6 @@ const jwt = require('jsonwebtoken')
 const {check, validationResult} = require('express-validator')
 const User = require('../models/User')
 const Role = require('../models/Role')
-const Tweet = require("../models/Tweet");
-// const authMiddleware = require('../middleware/auth.middleware')
 const router = Router()
 
 router.post(
@@ -55,12 +53,12 @@ router.post(
 
       const newUser = await User.findOne({username})
       const token = jwt.sign(
-        {userId: newUser._id},
+        {userId: newUser._id, role: defaultRole.role},
         config.get('jwtSecret'),
         {expiresIn: '744h'}
       )
 
-      res.status(201).json({message: 'Пользователь создан', token, userId: user.id})
+      res.status(201).json({message: 'Пользователь создан', token, userId: user.id, role: defaultRole.role})
 
     } catch (e) {
       console.log(e)
@@ -110,12 +108,12 @@ router.post(
       }
 
       const token = jwt.sign(
-        {userId: user.id},
+        {userId: user._id, role: user.role.role},
         config.get('jwtSecret'),
         {expiresIn: '72h'}
       )
 
-      res.json({token, userId: user.id})
+      res.json({token, userId: user.id, role: user.role.role})
 
     } catch (e) {
       res.status(500)
@@ -123,31 +121,6 @@ router.post(
     }
 
   }
-)
-
-router.post(
-    '/role',
-    async (req, res) => {
-
-      try {
-        const {role} = req.body
-
-        const candidate = await Role.findOne({role})
-        if (candidate) {
-          return res.status(400)
-              .json({message: 'Такая роль уже существует'})
-        }
-
-        const newRole = new Role({role})
-        await newRole.save()
-        res.status(201).json({message: 'Роль создан', newRole})
-
-      } catch (e) {
-        res.status(500)
-            .json({message: 'Что-то пошло не так, попробуйте снова'})
-      }
-
-    }
 )
 
 module.exports = router
