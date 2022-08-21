@@ -30,6 +30,31 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 )
 
+router.get('/:id', authMiddleware, async (req, res) => {
+        try {
+            const userId = req.params.id
+            const user = await User.findById(userId)
+            if (!user) {
+                return res.status(400).json({
+                    message: 'Пользователь не найден'
+                })
+            }
+
+            const tweets = await Tweet.find({_id: user.tweets})
+            // .populate('tweets')
+            // .populate('likes')
+            // .populate('commentToTweetId')
+
+            res.json({tweets})
+
+        } catch
+            (e) {
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
 router.post('/', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId)
@@ -76,12 +101,12 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
         const id = req.params.id;
         const tweet = await Tweet.findById(id)
 
-        if (tweet.likes.includes(user._id)) {
+        if (tweet.likes.includes(user._id) || user.likedTweets.includes(tweet._id)) {
             return res.status(200).json({message: 'Лайк уже добавлен'})
         }
 
-        await User.updateOne({_id: user._id}, {$push: {likedTweets: id}})
-        await Tweet.updateOne({_id: id}, {$push: {likes: user._id}})
+        await User.updateOne({_id: user._id}, {$push: {likedTweets: tweet._id}})
+        await Tweet.updateOne({_id: tweet._id}, {$push: {likes: user._id}})
 
         res.status(201).json({message: 'Лайк добавлен'})
 
@@ -100,16 +125,21 @@ router.delete('/:id/like', authMiddleware, async (req, res) => {
             })
         }
 
-        const id = req.params.id;
-        const tweet = await Tweet.findById(id)
+        const tweetId = req.params.id;
+        const tweet = await Tweet.findById(tweetId)
 
-        if (tweet.likes.includes(user._id)) {
-            // await User.updateOne({_id: user._id}, {$push: {likedTweets: id}})
-            // await Tweet.updateOne({_id: id}, {$push: {likes: user._id}})
-            return res.status(200).json({message: 'Лайк удален'})
+        if (!tweet.likes.includes(user._id) && !user.likedTweets.includes(tweet._id)) {
+            return res.status(200).json({message: 'Лайк уже удален'})
         }
 
-        res.status(200).json({message: 'Лайк уже удален'})
+        const likedTweets = user.likedTweets.filter(i => String(i) !== String(tweet._id))
+        await User.updateOne({_id: user._id}, {$set: {likedTweets}})
+
+        const likes = tweet.likes.filter(i => String(i) !== String(user._id))
+        await Tweet.updateOne({_id: tweet._id}, {$set: {likes}})
+
+        res.status(200).json({message: 'Лайк удален'})
+
 
     } catch (e) {
         res.status(500)
