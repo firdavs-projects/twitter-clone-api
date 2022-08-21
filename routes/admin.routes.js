@@ -7,11 +7,10 @@ const User = require('../models/User')
 const Role = require('../models/Role')
 const authMiddleware = require('../middleware/auth.middleware')
 const adminMiddleware = require('../middleware/admin.middleware')
-const Tweet = require("../models/Tweet");
 const router = Router()
 
 router.post(
-    '/register',
+    '/user',
     [
         check('username', 'Некорректное имя пользователя').exists(),
         check('firstName', 'Некорректное имя пользователя').exists(),
@@ -20,7 +19,7 @@ router.post(
             .isLength({min: 6}),
     ],
     authMiddleware,
-    // adminMiddleware,
+    adminMiddleware,
     async (req, res) => {
         try {
             const errors = validationResult(req)
