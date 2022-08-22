@@ -123,4 +123,20 @@ router.put(
     }
 )
 
+router.delete(
+    '/deletemyprofile',
+    authMiddleware,
+    async (req, res) => {
+        try {
+            await User.deleteOne({_id: req.user.userId})
+            res.status(201).json({message: 'Профиль успешно удален'})
+
+        } catch (e) {
+            console.log(e)
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
 module.exports = router
