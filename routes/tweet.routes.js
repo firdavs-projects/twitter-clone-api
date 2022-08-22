@@ -2,8 +2,6 @@ const {Router} = require('express')
 const User = require('../models/User')
 const Tweet = require('../models/Tweet')
 const authMiddleware = require('../middleware/auth.middleware')
-const adminMiddleware = require('../middleware/auth.middleware')
-const Role = require("../models/Role");
 const router = Router()
 
 // get all
