@@ -36,7 +36,7 @@ router.post(
         return res.status(400)
           .json({message: 'Такой пользователь уже существует'})
       }
-      const hashedPassword = await bcrypt.hash(password, 12)
+      const hashedPassword = await bcrypt.hash(password, 6)
 
       const defaultRole = await Role.findOne({role: 'USER'})
 
