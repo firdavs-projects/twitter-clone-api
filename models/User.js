@@ -6,6 +6,7 @@ const schema = new Schema({
   avatar: {type: String},
   birthDate: {type: Date},
   phone: {type: String},
+  status: {type: String},
 
   tweets: [{type: Types.ObjectId, ref: 'Tweet'}],
   likedTweets: [{type: Types.ObjectId, ref: 'Tweet'}],

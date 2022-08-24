@@ -15,9 +15,9 @@ router.get(
 
       try {
         const user = await User.findOne({_id: req?.user.userId})
-          .populate('tweets')
-          .populate('likedTweets')
-          .populate('role')
+          // .populate('tweets')
+          // .populate('likedTweets')
+          // .populate('role')
 
         if (!user) {
           return res.status(400).json({
@@ -42,9 +42,9 @@ router.get(
 
         try {
             const userData = await User.findOne({_id: req.params.id})
-                .populate('tweets')
-                .populate('likedTweets')
-                .populate('role')
+                // .populate('tweets')
+                // .populate('likedTweets')
+                // .populate('role')
 
             if (!userData) {
                 return res.status(400).json({
@@ -114,6 +114,43 @@ router.put(
             }})
 
             res.status(201).json({message: 'Профиль изменен'})
+
+        } catch (e) {
+            console.log(e)
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+router.put(
+    '/status',
+    authMiddleware,
+    async (req, res) => {
+        try {
+            const {status} = req.body
+
+            await User.updateOne({_id: req.user.userId}, {$set: {
+                status,
+            }})
+
+            res.status(201).json({message: 'Статус обновлён'})
+
+        } catch (e) {
+            console.log(e)
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+router.delete(
+    '/deletemyprofile',
+    authMiddleware,
+    async (req, res) => {
+        try {
+            await User.deleteOne({_id: req.user.userId})
+            res.status(201).json({message: 'Профиль успешно удален'})
 
         } catch (e) {
             console.log(e)
