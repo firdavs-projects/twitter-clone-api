@@ -2,7 +2,10 @@
   "port": 5000,
   "jwtSecret": "my finances is my fullstack project",
   "mongoUrl": "mongodb+srv://twitter:oejsMwVhTXFQrWUS@cluster0.9sxpsqn.mongodb.net/?retryWrites=true&w=majority",
-  "baseUrl": "http://localhost:5000/"
+  "baseUrl": "http://localhost:5000/",
+  "cloud_name": "twitter-clone-rs",
+  "api_key": "962853957875845",
+  "api_secret": "EQBpwzRWjYpf1-8Mz_Aw9S_KyZo"
 }
 
 
