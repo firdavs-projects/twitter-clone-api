@@ -150,7 +150,7 @@ router.put(
 // )
 
 router.delete(
-    '/deletemyprofile',
+    '/',
     authMiddleware,
     async (req, res) => {
         try {
