@@ -11,6 +11,9 @@ const schema = new Schema({
   tweets: [{type: Types.ObjectId, ref: 'Tweet'}],
   likedTweets: [{type: Types.ObjectId, ref: 'Tweet'}],
 
+  subscriptions:[{type: Types.ObjectId, ref: 'User'}],
+  followers:[{type: Types.ObjectId, ref: 'User'}],
+
   firstName: {type: String, required: true},
   lastName: {type: String, required: true},
   username: {type: String, required: true, unique: true},
