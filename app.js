@@ -17,7 +17,7 @@ app.use('/api/auth', require('./routes/auth.routes'))
 app.use('/api/profile', require('./routes/profile.routes'))
 app.use('/api/admin', require('./routes/admin.routes'))
 app.use('/api/tweet', require('./routes/tweet.routes'))
-app.use('/api/upload', require('./routes/upload.routes'))
+// app.use('/api/upload', require('./routes/upload'))
 
 const PORT = process.env.PORT || 5000
 

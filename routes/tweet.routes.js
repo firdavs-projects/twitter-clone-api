@@ -3,6 +3,8 @@ const User = require('../models/User')
 const Tweet = require('../models/Tweet')
 const authMiddleware = require('../middleware/auth.middleware')
 const router = Router()
+const cloudinary = require("cloudinary");
+const formidable = require("formidable");
 
 // get all
 router.get('/all', authMiddleware, async (req, res) => {
@@ -11,8 +13,29 @@ router.get('/all', authMiddleware, async (req, res) => {
             const tweets = await Tweet.find({commentToTweetId: undefined})
                 // .where('commentToTweetId').gte(undefined)
                 .populate('tweets')
+                // .populate('likes')
+                // .populate('commentToTweetId')
+            res.json({tweets})
+
+        } catch
+            (e) {
+            res.status(500)
+                .json({message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
+
+// get by subscriptions
+router.get('/subscriptions', authMiddleware, async (req, res) => {
+        try {
+            const userId = req.user.userId
+            const user = await User.findById(userId)
+
+            const tweets = await Tweet.find({user: user.subscriptions})
+            // .populate('tweets')
             // .populate('likes')
             // .populate('commentToTweetId')
+
             res.json({tweets})
 
         } catch
@@ -106,31 +129,65 @@ router.get('/:id', authMiddleware, async (req, res) => {
 )
 
 // create
+const createTweet = async (userId, fields, result, callback) => {
+    const image = result?.secure_url ?? '';
+    const {text, commentToTweetId} = fields;
+    const mainTweet = await Tweet.findById(commentToTweetId)
+    const tweet = new Tweet({
+        user: userId,
+        text,
+        ...(image && {image}),
+        ...(mainTweet && {commentToTweetId})
+    })
+    await tweet.save()
+    await User.updateOne({_id: userId}, {$push: {tweets: tweet._id}})
+
+    if (mainTweet) {
+        await Tweet.updateOne({_id: commentToTweetId}, {$push: {tweets: tweet._id}})
+    }
+
+    return callback(null, tweet);
+}
+
 router.post('/', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId)
-
         if (!user) {
             return res.status(400).json({
                 message: 'Пользователь не найден'
             })
         }
-        const {text, image, commentToTweetId} = req.body
 
-        const mainTweet = await Tweet.findById(commentToTweetId)
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            if (err) {return res.status(500)}
 
-        const tweet = new Tweet({
-            user: req.user.userId,
-            text, image, ...(mainTweet && {commentToTweetId})
-        })
-        await tweet.save()
-        await User.updateOne({_id: req.user.userId}, {$push: {tweets: tweet._id}})
-
-        if (mainTweet) {
-            await Tweet.updateOne({_id: commentToTweetId}, {$push: {tweets: tweet._id}})
-        }
-
-        res.status(201).json({message: 'Новый твит создан', tweet, userId: req.user.userId})
+            if (files?.file?.filepath) {
+                cloudinary.v2.uploader.upload(
+                    files.file.filepath,
+                    { public_id: files.file.newFilename },
+                    async (error, result) => {
+                        if (error) {return res.status(500)}
+                        createTweet(
+                            req.user.userId,
+                            fields,
+                            result,
+                            (err, tweet) => {
+                                if (err) {return res.status(500)}
+                                return res.status(201).json({message: 'Новый твит создан', tweet, userId: req.user.userId})
+                            })
+                    });
+            } else {
+                createTweet(
+                    req.user.userId,
+                    fields,
+                    null,
+                    (err, tweet) => {
+                        if (err) {return res.status(500)}
+                        return res.status(201).json({message: 'Новый твит создан', tweet, userId: req.user.userId})
+                    })
+            }
+        });
 
     } catch (e) {
         res.status(500)
@@ -139,40 +196,59 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 // update by id
+const updateTweet = async (tweetId, fields, result, callback) => {
+    const image = result?.secure_url ?? '';
+    const {text} = fields;
+
+    await Tweet.updateOne({_id: tweetId}, {$set: {
+        ...(text && {text}),
+        ...(image && {image}),
+    }})
+
+    return callback(null);
+}
+
 router.put('/:id', authMiddleware, async (req, res) => {
     try {
-        // const user = await User.findById(req.user.userId)
-
         const tweetId = req.params.id;
         const tweet = await Tweet.findById(tweetId)
-
         if (!tweet) {
             return res.status(404).json({message: 'Твит не найден'})
         }
-
         if (String(tweet.user) !== String(req.user.userId)) {
             return res.status(403).json({message: 'Нет доступа'})
         }
 
-        const {text, image} = req.body
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            if (err) {return res.status(500)}
 
-        await Tweet.updateOne({_id: tweetId}, {$set: {text, ...(image && {image})}})
-
-        // const mainTweet = await Tweet.findById(commentToTweetId)
-
-        // const tweet = new Tweet({
-        //     user: req.user.userId,
-        //     text, image, ...(mainTweet && {commentToTweetId})
-        // })
-        // await tweet.save()
-        // await User.updateOne({_id: req.user.userId}, {$push: {tweets: tweet._id}})
-
-        // if (mainTweet) {
-        //     await Tweet.updateOne({_id: commentToTweetId}, {$push: {tweets: tweet._id}})
-        // }
-
-        res.status(201).json({message: 'Ваш твит изменен'})
-
+            if (files?.file?.filepath) {
+                cloudinary.v2.uploader.upload(
+                    files.file.filepath,
+                    { public_id: files.file.newFilename },
+                    async (error, result) => {
+                        if (error) {return res.status(500)}
+                        updateTweet(
+                            tweetId,
+                            fields,
+                            result,
+                            (err) => {
+                                if (err) {return res.status(500)}
+                                res.status(201).json({message: 'Ваш твит изменен'})
+                            })
+                    });
+            } else {
+                updateTweet(
+                    tweetId,
+                    fields,
+                    null,
+                    (err) => {
+                        if (err) {return res.status(500)}
+                        res.status(201).json({message: 'Ваш твит изменен'})
+                    })
+            }
+        });
     } catch (e) {
         res.status(500)
             .json({message: 'Что-то пошло не так, попробуйте снова'})
@@ -182,7 +258,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
 // delete by id
 router.delete('/:id', authMiddleware, async (req, res) => {
         try {
-            // const user = await User.findById(req.user.userId)
             const tweetId = req.params.id
             const tweet = await Tweet.findById(tweetId)
 
@@ -205,7 +280,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 )
 
-// ---------------------------------------------------------------------------------------------------------------//
 // add remove like
 router.post('/:id/like', authMiddleware, async (req, res) => {
     try {
@@ -264,81 +338,5 @@ router.delete('/:id/like', authMiddleware, async (req, res) => {
             .json({message: 'Что-то пошло не так, попробуйте снова'})
     }
 })
-
-// router.delete('/like', authMiddleware, async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user.userId)
-//
-//         if (!user) {
-//             return res.status(400).json({
-//                 message: 'Пожалуйста сначала выполните вход'
-//             })
-//         }
-//
-//         const {tweet} = req.body
-//         // const like = await Like.findById(id)
-//         // if (like) {
-//         //     // await Like.deleteOne({_id: id})
-//         //     // await User.updateOne({_id: req.user.userId}, {$push: {likedTweets: tweet}})
-//         //     // await Tweet.updateOne({_id: tweet}, {$push: {likes: like._id}})
-//         //
-//         // }
-//
-//
-//     } catch (e) {
-//         res.status(500)
-//             .json({message: 'Что-то пошло не так, попробуйте снова'})
-//     }
-// })
-
-// router.get('/currency', async (req, res) => {
-//     try {
-//
-//         const currency = await Currency.find({})
-//         res.json(currency)
-//
-//     } catch (e) {
-//         res.status(500)
-//             .json({message: 'Что-то пошло не так, попробуйте снова'})
-//     }
-// })
-
-// ---------------------------------------------------------------------------------------------------------------//
-
-// router.post('/type/add', authMiddleware, async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user.userId)
-//
-//         if (!user) {
-//             return res.status(400).json({
-//                 message: 'Пожалуйста сначала выполните вход'
-//             })
-//         }
-//         const {name, icon} = req.body
-//
-//         const type = new Type({
-//             name, icon
-//         })
-//
-//         await type.save()
-//         res.status(201).json({message: 'Новый тип добавлен', type})
-//
-//     } catch (e) {
-//         res.status(500)
-//             .json({message: 'Что-то пошло не так, попробуйте снова'})
-//     }
-// })
-
-// router.get('/type', async (req, res) => {
-//     try {
-//
-//         const type = await Type.find({})
-//         res.json(type)
-//
-//     } catch (e) {
-//         res.status(500)
-//             .json({message: 'Что-то пошло не так, попробуйте снова'})
-//     }
-// })
 
 module.exports = router
