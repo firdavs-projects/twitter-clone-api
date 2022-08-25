@@ -81,39 +81,44 @@ router.get(
 router.put(
     '/',
     authMiddleware,
-    [
-        check('username', 'Некорректное имя пользователя').exists(),
-        check('firstName', 'Некорректное имя пользователя').exists(),
-        check('lastName', 'Некорректная фамилия пользователя').exists(),
-    ],
+    // [
+    //     check('username', 'Некорректное имя пользователя').exists({ checkNull: true }),
+    //     check('firstName', 'Некорректное имя пользователя').exists({ checkNull: true }),
+    //     check('lastName', 'Некорректная фамилия пользователя').exists({ checkNull: true }),
+    // ],
     async (req, res) => {
         try {
 
-            const errors = validationResult(req)
-
-            if (!errors.isEmpty()) {
-                return res.status(400).json({
-                    errors: errors.array(),
-                    message: 'Некорректные данные при изменении профиля'
-                })
-            }
+            // const errors = validationResult(req)
+            //
+            // if (!errors.isEmpty()) {
+            //     return res.status(400).json({
+            //         errors: errors.array(),
+            //         message: 'Некорректные данные при изменении профиля'
+            //     })
+            // }
 
             const current = await User.findOne({_id: req.user.userId})
 
-            const {username, firstName, lastName, birthDate, avatar, phone} = req.body
+            const {username, firstName, lastName, birthDate, avatar, phone, status} = req.body
 
-            const candidate = await User.findOne({username})
-
-            if (candidate && String(username) !== String(current.username)) {
+            const candidate = username && await User.findOne({username})
+            if (username && candidate && String(username) !== String(current.username)) {
                 return res.status(400)
                     .json({message: 'Имя пользователя занято'})
             }
 
             await User.updateOne({_id: req.user.userId}, {$set: {
-                username, firstName, lastName, birthDate, avatar, phone,
+                ...(username && {username}),
+                ...(firstName && {firstName}),
+                ...(lastName && {lastName}),
+                ...(birthDate && {birthDate}),
+                ...(avatar && {avatar}),
+                ...(phone && {phone}),
+                ...(status && {status}),
             }})
 
-            res.status(201).json({message: 'Профиль изменен'})
+            res.status(201).json({message: 'Изменения профиля сохранены'})
 
         } catch (e) {
             console.log(e)
@@ -123,29 +128,29 @@ router.put(
     }
 )
 
-router.put(
-    '/status',
-    authMiddleware,
-    async (req, res) => {
-        try {
-            const {status} = req.body
-
-            await User.updateOne({_id: req.user.userId}, {$set: {
-                status,
-            }})
-
-            res.status(201).json({message: 'Статус обновлён'})
-
-        } catch (e) {
-            console.log(e)
-            res.status(500)
-                .json({message: 'Что-то пошло не так, попробуйте снова'})
-        }
-    }
-)
+// router.put(
+//     '/status',
+//     authMiddleware,
+//     async (req, res) => {
+//         try {
+//             const {status} = req.body
+//
+//             await User.updateOne({_id: req.user.userId}, {$set: {
+//                 status,
+//             }})
+//
+//             res.status(201).json({message: 'Статус обновлён'})
+//
+//         } catch (e) {
+//             console.log(e)
+//             res.status(500)
+//                 .json({message: 'Что-то пошло не так, попробуйте снова'})
+//         }
+//     }
+// )
 
 router.delete(
-    '/deletemyprofile',
+    '/',
     authMiddleware,
     async (req, res) => {
         try {
