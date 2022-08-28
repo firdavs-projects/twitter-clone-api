@@ -57,20 +57,70 @@ router.get(
     }
 )
 
+// router.get(
+//     '/:id',
+//     authMiddleware,
+//     async (req, res) => {
+//
+//         try {
+//             const userData = await User.findOne({_id: req.params.id})
+//                 .populate('subscriptions', ['firstName', 'lastName', 'username'])
+//                 .populate('followers', ['firstName', 'lastName', 'username'])
+//                 // .populate('subscriptions')
+//                 // .populate('followers')
+//                 // .populate('tweets')
+//                 // .populate('likedTweets')
+//                 // .populate('role')
+//
+//             if (!userData) {
+//                 return res.status(400).json({
+//                     message: 'Пользователь не найден'
+//                 })
+//             }
+//
+//             const user = {
+//                 date: userData.date,
+//
+//                 avatar: userData.avatar,
+//                 birthDate: userData.birthDate,
+//                 phone: userData.phone,
+//
+//                 tweets: userData.tweets,
+//                 likedTweets: userData.likedTweets,
+//
+//                 subscriptions: userData?.subscriptions || [],
+//                 followers: userData?.followers || [],
+//
+//                 firstName: userData.firstName,
+//                 lastName: userData.lastName,
+//                 username: userData.username,
+//                 role: userData.role.role,
+//             }
+//
+//             res.json(user)
+//
+//         } catch (e) {
+//             res.status(500)
+//                 .json({message: 'Что-то пошло не так, попробуйте снова'})
+//         }
+//
+//     }
+// )
+
 router.get(
-    '/:id',
+    '/:username',
     authMiddleware,
     async (req, res) => {
 
         try {
-            const userData = await User.findOne({_id: req.params.id})
+            const userData = await User.findOne({username: req.params.username})
                 .populate('subscriptions', ['firstName', 'lastName', 'username'])
                 .populate('followers', ['firstName', 'lastName', 'username'])
-                // .populate('subscriptions')
-                // .populate('followers')
-                // .populate('tweets')
-                // .populate('likedTweets')
-                // .populate('role')
+            // .populate('subscriptions')
+            // .populate('followers')
+            // .populate('tweets')
+            // .populate('likedTweets')
+            // .populate('role')
 
             if (!userData) {
                 return res.status(400).json({
@@ -80,6 +130,7 @@ router.get(
 
             const user = {
                 date: userData.date,
+                _id: userData._id,
 
                 avatar: userData.avatar,
                 birthDate: userData.birthDate,

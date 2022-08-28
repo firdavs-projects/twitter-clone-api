@@ -19,7 +19,7 @@ app.use('/api/admin', require('./routes/admin.routes'))
 app.use('/api/tweet', require('./routes/tweet.routes'))
 // app.use('/api/upload', require('./routes/upload'))
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 4000
 
 server.listen(PORT, () => {
   console.log(`App has been started on port ${PORT}`)
