@@ -34,9 +34,11 @@ router.get(
       try {
         const user = await User.findOne({_id: req?.user.userId})
           // .populate('subscriptions')
+            .populate('subscriptions', ['firstName', 'lastName', 'username'])
+            .populate('followers', ['firstName', 'lastName', 'username'])
           // .populate('followers')
-          // .populate('tweets')
-          // .populate('likedTweets')
+          //   .populate('tweets')
+          //   .populate('likedTweets')
           // .populate('role')
 
         if (!user) {
@@ -62,6 +64,8 @@ router.get(
 
         try {
             const userData = await User.findOne({_id: req.params.id})
+                .populate('subscriptions', ['firstName', 'lastName', 'username'])
+                .populate('followers', ['firstName', 'lastName', 'username'])
                 // .populate('subscriptions')
                 // .populate('followers')
                 // .populate('tweets')
@@ -204,6 +208,12 @@ router.post(
                 })
             }
 
+            if(user.followers.includes(req.user.userId)) {
+                return res.status(500).json({
+                    message: 'Вы уже подписаны на пользователя ' + user?.username
+                })
+            }
+
             await User.updateOne({_id: req.user.userId}, {$push: {subscriptions: user._id}})
             await User.updateOne({_id: user._id}, {$push: {followers: req.user.userId}})
 
@@ -228,6 +238,12 @@ router.delete(
             if (!user) {
                 return res.status(400).json({
                     message: 'Пользователь не найден'
+                })
+            }
+
+            if(!user.followers.includes(req.user.userId)) {
+                return res.status(500).json({
+                    message: 'Вы уже отписались от пользователя ' + user?.username
                 })
             }
 

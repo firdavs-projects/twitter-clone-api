@@ -299,6 +299,12 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
         const id = req.params.id;
         const tweet = await Tweet.findById(id)
 
+        if (!tweet) {
+            return res.status(404).json({
+                message: 'Твит не найден'
+            })
+        }
+
         if (tweet.likes.includes(user._id) || user.likedTweets.includes(tweet._id)) {
             return res.status(200).json({message: 'Лайк уже добавлен'})
         }
@@ -325,6 +331,12 @@ router.delete('/:id/like', authMiddleware, async (req, res) => {
 
         const tweetId = req.params.id;
         const tweet = await Tweet.findById(tweetId)
+
+        if (!tweet) {
+            return res.status(404).json({
+                message: 'Твит не найден'
+            })
+        }
 
         if (!tweet.likes.includes(user._id) && !user.likedTweets.includes(tweet._id)) {
             return res.status(200).json({message: 'Лайк уже удален'})
