@@ -34,8 +34,8 @@ router.get(
       try {
         const user = await User.findOne({_id: req?.user.userId})
           // .populate('subscriptions')
-            .populate('subscriptions', ['firstName', 'lastName', 'username'])
-            .populate('followers', ['firstName', 'lastName', 'username'])
+            .populate('subscriptions', ['firstName', 'lastName', 'username', 'avatar'])
+            .populate('followers', ['firstName', 'lastName', 'username', 'avatar'])
           // .populate('followers')
           //   .populate('tweets')
           //   .populate('likedTweets')
@@ -114,8 +114,8 @@ router.get(
 
         try {
             const userData = await User.findOne({username: req.params.username})
-                .populate('subscriptions', ['firstName', 'lastName', 'username'])
-                .populate('followers', ['firstName', 'lastName', 'username'])
+                .populate('subscriptions', ['firstName', 'lastName', 'username', 'avatar'])
+                .populate('followers', ['firstName', 'lastName', 'username', 'avatar'])
             // .populate('subscriptions')
             // .populate('followers')
             // .populate('tweets')
