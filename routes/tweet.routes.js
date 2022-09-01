@@ -81,7 +81,7 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
 router.get('/user/:username', authMiddleware, async (req, res) => {
         try {
             const username = req.params.username
-            const user = await User.find({username})
+            const user = await User.findOne({username})
             if (!user) {
                 return res.status(400).json({
                     message: 'Пользователь не найден'
