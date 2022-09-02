@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const User = require("../models/User");
+const Expired = require("../models/Expired");
 module.exports = async (req, res, next) => {
   if (req.method === 'OPTIONS') {
     return next()
@@ -10,6 +11,11 @@ module.exports = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1]
     if (!token) {
       return res.status(401).json({message: 'Пользователь не авторизован'})
+    }
+
+    const expired = await Expired.findOne({token})
+    if (expired) {
+      return res.status(401).json({message: 'Выполните вход еще раз. Токен больше не действителен'})
     }
 
     const userData = jwt.verify(token, config.get('jwtSecret'))

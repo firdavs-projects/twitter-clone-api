@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken')
 const {check, validationResult} = require('express-validator')
 const User = require('../models/User')
 const Role = require('../models/Role')
+const Expired = require('../models/Expired')
 const router = Router()
+const authMiddleware = require('../middleware/auth.middleware')
 
 router.post(
   '/register',
@@ -55,7 +57,7 @@ router.post(
       const token = jwt.sign(
         {userId: newUser._id, role: defaultRole.role},
         config.get('jwtSecret'),
-        {expiresIn: '744h'}
+        {expiresIn: '48h'}
       )
 
       res.status(201).json({message: 'Пользователь создан', token, userId: user.id, role: defaultRole.role})
@@ -110,7 +112,7 @@ router.post(
       const token = jwt.sign(
         {userId: user._id, role: user.role.role},
         config.get('jwtSecret'),
-        {expiresIn: '72h'}
+        {expiresIn: '48h'}
       )
 
       res.json({token, userId: user.id, role: user.role.role})
@@ -121,6 +123,31 @@ router.post(
     }
 
   }
+)
+
+router.get(
+    '/logout',
+    authMiddleware,
+    async (req, res) => {
+      try {
+        const token = req.headers.authorization.split(' ')[1]
+        const expired = new Expired({
+          token
+        })
+        await expired.save()
+
+        let twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate()-3);
+
+        await Expired.deleteMany({"created_at" : {$lt: twoDaysAgo }})
+
+        res.json({message: 'Токен удалён'})
+
+      } catch (e) {
+        res.status(500)
+            .json({message: 'Что-то пошло не так, попробуйте снова'})
+      }
+    }
 )
 
 module.exports = router
