@@ -25,6 +25,10 @@ module.exports = async (req, res, next) => {
       return res.status(404).json({message: 'Пользователь не найден'})
     }
 
+    if (user.blocked) {
+      return res.status(403).json({message: 'Пользователь заблокирован, обратитесь к администратору'})
+    }
+
     req.user = userData
     next()
 

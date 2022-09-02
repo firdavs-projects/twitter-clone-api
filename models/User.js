@@ -14,6 +14,8 @@ const schema = new Schema({
   subscriptions:[{type: Types.ObjectId, ref: 'User'}],
   followers:[{type: Types.ObjectId, ref: 'User'}],
 
+  blocked: {type: Boolean, default: false},
+
   firstName: {type: String, required: true},
   lastName: {type: String, required: true},
   username: {type: String, required: true, unique: true},
