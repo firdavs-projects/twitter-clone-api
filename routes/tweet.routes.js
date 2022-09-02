@@ -10,7 +10,7 @@ const formidable = require("formidable");
 router.get('/all', authMiddleware, async (req, res) => {
         try {
 
-            const tweets = await Tweet.find({commentToTweetId: undefined})
+            const tweets = await Tweet.find({commentToTweetId: undefined}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
                 // .where('commentToTweetId').gte(undefined)
@@ -33,7 +33,7 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
             const userId = req.user.userId
             const user = await User.findById(userId)
 
-            const tweets = await Tweet.find({user: user.subscriptions, commentToTweetId: null})
+            const tweets = await Tweet.find({user: user.subscriptions, commentToTweetId: undefined}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
             // .populate('tweets')
@@ -88,7 +88,7 @@ router.get('/user/:username', authMiddleware, async (req, res) => {
                 })
             }
 
-            const tweets = await Tweet.find({_id: user.tweets})
+            const tweets = await Tweet.find({_id: user.tweets}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
@@ -116,7 +116,7 @@ router.get('/', authMiddleware, async (req, res) => {
                 })
             }
 
-            const tweets = await Tweet.find({_id: user.tweets})
+            const tweets = await Tweet.find({_id: user.tweets}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
