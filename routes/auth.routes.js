@@ -93,7 +93,7 @@ router.post(
       const user = await User.findOne({username})
           // .populate('tweets')
           // .populate('likedTweets')
-          // .populate('role')
+          .populate('role', ['role'])
 
       // await User.updateOne({_id: user._id}, {$set: {lastSeen: Date.now()}})
 
