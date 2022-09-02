@@ -143,8 +143,11 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
             const id = req.params.id;
             const tweet = await Tweet.findById(id)
+                .populate({
+                    path: 'tweets',
+                    populate: { path: 'user', select: ['firstName', 'lastName', 'username', 'avatar'] }
+                })
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
-                .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('commentToTweetId')
 
