@@ -33,7 +33,7 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
             const userId = req.user.userId
             const user = await User.findById(userId)
 
-            const tweets = await Tweet.find({user: user.subscriptions, commentToTweetId: undefined}).sort({date:-1})
+            const tweets = await Tweet.find({user: [...user.subscriptions, user._id], commentToTweetId: undefined}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
             // .populate('tweets')
