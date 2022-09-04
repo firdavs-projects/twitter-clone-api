@@ -17,10 +17,7 @@ app.use('/api/auth', require('./routes/auth.routes'))
 app.use('/api/profile', require('./routes/profile.routes'))
 app.use('/api/admin', require('./routes/admin.routes'))
 app.use('/api/tweet', require('./routes/tweet.routes'))
-// app.use('/api/upload', require('./routes/upload'))
 
 const PORT = process.env.PORT || 4000
 
-server.listen(PORT, () => {
-  console.log(`App has been started on port ${PORT}`)
-})
+server.listen(PORT, () => console.log(`App has been started on port ${PORT}`))

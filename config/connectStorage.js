@@ -10,7 +10,7 @@ const connectStorage = async () => {
     });
     console.log('Connected to the Cloudinary')
   } catch (e) {
-    console.error('Server Error', e.message)
+    console.error('Cloudinary Error', e.message)
     process.exit(1)
   }
 }
