@@ -10,9 +10,10 @@ const formidable = require("formidable");
 router.get('/all', authMiddleware, async (req, res) => {
         try {
 
-            const tweets = await Tweet.find({commentToTweetId: undefined}).sort({date:-1})
+            const tweets = await Tweet.find().sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
+                .populate('tweets', ['text', 'image'])
                 // .where('commentToTweetId').gte(undefined)
                 // .populate('tweets')
                 // .populate('likes')
@@ -36,6 +37,7 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
             const tweets = await Tweet.find({user: [...user.subscriptions, user._id], commentToTweetId: undefined}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
+                .populate('tweets', ['text', 'image'])
             // .populate('tweets')
             // .populate('likes')
             // .populate('commentToTweetId')
@@ -90,6 +92,7 @@ router.get('/user/:username', authMiddleware, async (req, res) => {
 
             const tweets = await Tweet.find({_id: user.tweets}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
+                .populate('tweets', ['text', 'image'])
                 // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
             // .populate('commentToTweetId')
@@ -120,6 +123,7 @@ router.get('/', authMiddleware, async (req, res) => {
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
+                .populate('tweets', ['text', 'image'])
                 // .populate('commentToTweetId')
             res.json({tweets})
 
@@ -146,6 +150,10 @@ router.get('/:id', authMiddleware, async (req, res) => {
                 .populate({
                     path: 'tweets',
                     populate: { path: 'user', select: ['firstName', 'lastName', 'username', 'avatar'] }
+                })
+                .populate({
+                    path: 'tweets',
+                    populate: { path: 'tweets', select: ['text', 'image'] }
                 })
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
