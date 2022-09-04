@@ -14,10 +14,6 @@ router.get('/all', authMiddleware, async (req, res) => {
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('tweets', ['text', 'image'])
-                // .where('commentToTweetId').gte(undefined)
-                // .populate('tweets')
-                // .populate('likes')
-                // .populate('commentToTweetId')
             res.json({tweets})
 
         } catch
@@ -38,9 +34,6 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('tweets', ['text', 'image'])
-            // .populate('tweets')
-            // .populate('likes')
-            // .populate('commentToTweetId')
 
             res.json({tweets})
 
@@ -51,33 +44,6 @@ router.get('/subscriptions', authMiddleware, async (req, res) => {
         }
     }
 )
-
-// // get by user id
-// router.get('/user/:id', authMiddleware, async (req, res) => {
-//         try {
-//             const userId = req.params.id
-//             const user = await User.findById(userId)
-//             if (!user) {
-//                 return res.status(400).json({
-//                     message: 'Пользователь не найден'
-//                 })
-//             }
-//
-//             const tweets = await Tweet.find({_id: user.tweets})
-//                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
-//                 // .populate('tweets')
-//                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
-//                 // .populate('commentToTweetId')
-//
-//             res.json({tweets})
-//
-//         } catch
-//             (e) {
-//             res.status(500)
-//                 .json({message: 'Что-то пошло не так, попробуйте снова'})
-//         }
-//     }
-// )
 
 // get by user username
 router.get('/user/:username', authMiddleware, async (req, res) => {
@@ -93,9 +59,7 @@ router.get('/user/:username', authMiddleware, async (req, res) => {
             const tweets = await Tweet.find({_id: user.tweets}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('tweets', ['text', 'image'])
-                // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
-            // .populate('commentToTweetId')
 
             res.json({tweets})
 
@@ -121,10 +85,8 @@ router.get('/', authMiddleware, async (req, res) => {
 
             const tweets = await Tweet.find({_id: user.tweets}).sort({date:-1})
                 .populate('user', ['firstName', 'lastName', 'username', 'avatar'])
-                // .populate('tweets')
                 .populate('likes', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('tweets', ['text', 'image'])
-                // .populate('commentToTweetId')
             res.json({tweets})
 
         } catch

@@ -11,10 +11,7 @@ router.get(
     async (req, res) => {
 
         try {
-            const users = await User.find().sort({'tweets': -1}).limit(10)
-            // .populate('tweets')
-            // .populate('likedTweets')
-            // .populate('role')
+            const users = await User.find().sort({'tweets': -1}).limit(20)
 
             res.json(users)
 
@@ -33,13 +30,8 @@ router.get(
 
       try {
         const user = await User.findOne({_id: req?.user.userId})
-          // .populate('subscriptions')
             .populate('subscriptions', ['firstName', 'lastName', 'username', 'avatar'])
             .populate('followers', ['firstName', 'lastName', 'username', 'avatar'])
-          // .populate('followers')
-          //   .populate('tweets')
-          //   .populate('likedTweets')
-          // .populate('role')
 
         if (!user) {
           return res.status(400).json({
@@ -57,56 +49,6 @@ router.get(
     }
 )
 
-// router.get(
-//     '/:id',
-//     authMiddleware,
-//     async (req, res) => {
-//
-//         try {
-//             const userData = await User.findOne({_id: req.params.id})
-//                 .populate('subscriptions', ['firstName', 'lastName', 'username'])
-//                 .populate('followers', ['firstName', 'lastName', 'username'])
-//                 // .populate('subscriptions')
-//                 // .populate('followers')
-//                 // .populate('tweets')
-//                 // .populate('likedTweets')
-//                 // .populate('role')
-//
-//             if (!userData) {
-//                 return res.status(400).json({
-//                     message: 'Пользователь не найден'
-//                 })
-//             }
-//
-//             const user = {
-//                 date: userData.date,
-//
-//                 avatar: userData.avatar,
-//                 birthDate: userData.birthDate,
-//                 phone: userData.phone,
-//
-//                 tweets: userData.tweets,
-//                 likedTweets: userData.likedTweets,
-//
-//                 subscriptions: userData?.subscriptions || [],
-//                 followers: userData?.followers || [],
-//
-//                 firstName: userData.firstName,
-//                 lastName: userData.lastName,
-//                 username: userData.username,
-//                 role: userData.role.role,
-//             }
-//
-//             res.json(user)
-//
-//         } catch (e) {
-//             res.status(500)
-//                 .json({message: 'Что-то пошло не так, попробуйте снова'})
-//         }
-//
-//     }
-// )
-
 router.get(
     '/:username',
     authMiddleware,
@@ -116,11 +58,6 @@ router.get(
             const userData = await User.findOne({username: req.params.username})
                 .populate('subscriptions', ['firstName', 'lastName', 'username', 'avatar'])
                 .populate('followers', ['firstName', 'lastName', 'username', 'avatar'])
-            // .populate('subscriptions')
-            // .populate('followers')
-            // .populate('tweets')
-            // .populate('likedTweets')
-            // .populate('role')
 
             if (!userData) {
                 return res.status(400).json({
@@ -202,7 +139,7 @@ router.put(
                                 result,
                                 (err) => {
                                     if (err) {return res.status(500)}
-                                    res.status(201).json({message: 'Ваш твит изменен'})
+                                    res.status(201).json({message: 'Изменения профиля сохранены'})
                                 })
                         });
                 } else {

@@ -7,7 +7,6 @@ const User = require('../models/User')
 const Role = require('../models/Role')
 const Expired = require('../models/Expired')
 const router = Router()
-const authMiddleware = require('../middleware/auth.middleware')
 
 router.post(
   '/register',
@@ -91,11 +90,7 @@ router.post(
       const {username, password} = req.body
 
       const user = await User.findOne({username})
-          // .populate('tweets')
-          // .populate('likedTweets')
           .populate('role', ['role'])
-
-      // await User.updateOne({_id: user._id}, {$set: {lastSeen: Date.now()}})
 
       if (!user) {
         return res.status(400).json({
